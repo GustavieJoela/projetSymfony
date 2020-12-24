@@ -4,12 +4,15 @@ namespace App\Entity;
 
 use App\Repository\ArticleRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 /**
  * @ORM\Entity(repositoryClass=ArticleRepository::class)
  */
 class Article
 {
+    const STATUTS=["publier"=>"publier","depublier"=>"depublier","brouillon"=>"brouillon"];
     /**
      * @ORM\Id
      * @ORM\GeneratedValue
@@ -19,11 +22,13 @@ class Article
 
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
+     * @Assert\NotBlank(message="Le titre est obligatoire")
      */
     private $titre;
 
     /**
      * @ORM\Column(type="text", nullable=true)
+     * @Assert\NotBlank(message="Le contenu est obligatoire")
      */
     private $contenu;
 
@@ -31,11 +36,6 @@ class Article
      * @ORM\Column(type="string", length=255, nullable=true)
      */
     private $photo;
-
-    /**
-     * @ORM\Column(type="string", length=255, nullable=true)
-     */
-    private $description;
 
     /**
      * @ORM\Column(type="datetime")
@@ -55,8 +55,15 @@ class Article
     /**
      * @ORM\ManyToOne(targetEntity=Categorie::class, inversedBy="articles")
      * @ORM\JoinColumn(nullable=false)
+     * @Assert\NotBlank(message="La catégorie est obligatoire")
      */
     private $categorie;
+
+    /**
+     * @ORM\Column(type="string", length=255)
+     *  @Assert\Choice(choices=Article::STATUTS, message="Veuillez saisir un statut valide")
+     */
+    private $statut="brouillon";
 
     public function __construct(){
         $this->createAt=new \DateTime;
@@ -100,18 +107,6 @@ class Article
     public function setPhoto(?string $photo): self
     {
         $this->photo = $photo;
-
-        return $this;
-    }
-
-    public function getDescription(): ?string
-    {
-        return $this->description;
-    }
-
-    public function setDescription(?string $description): self
-    {
-        $this->description = $description;
 
         return $this;
     }
@@ -160,6 +155,18 @@ class Article
     public function setCategorie(?Categorie $categorie): self
     {
         $this->categorie = $categorie;
+
+        return $this;
+    }
+
+    public function getStatut(): ?string
+    {
+        return $this->statut;
+    }
+
+    public function setStatut(string $statut): self
+    {
+        $this->statut = $statut;
 
         return $this;
     }
